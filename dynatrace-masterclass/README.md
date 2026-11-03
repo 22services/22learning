@@ -1,6 +1,6 @@
 # Dynatrace Chalkboard Masterclass
 
-12 narrated "chalkboard video" lessons for Dynatrace engineer/architect interview preparation.
+12 short narrated "chalkboard video" lessons (7–10 min each) for Dynatrace engineer/architect interview preparation.
 Open `index.html` in Chrome or Edge (best voices). Narration uses the browser's free built-in
 Web Speech voice; captions, speed, voice choice, scene skipping, quizzes and interview corners are built in.
 
@@ -9,3 +9,5 @@ Web Speech voice; captions, speed, voice choice, scene skipping, quizzes and int
 - `episodes-b.js` – lessons 7–12 (Kubernetes/cloud, Davis analytics/SLOs, AppEngine/Workflows, cost/optimisation, AI/LLM observability, architecture & interview)
 
 Keys: Space play/pause · ←/→ scenes · C captions · M narration · F fullscreen.
+
+Each scene has a "Check it at work · Managed" tip. Screenshots in `images/` are © Dynatrace, from docs.dynatrace.com (source linked on each), for personal study.

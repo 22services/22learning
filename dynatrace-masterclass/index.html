@@ -96,6 +96,18 @@ header.top p{margin:4px 0 0;color:var(--chalk-dim);max-width:62ch}
 .code .c{color:var(--chalk-faint)} .code .k{color:var(--yellow)} .code .s{color:var(--blue)}
 .note{font-size:13px;color:var(--chalk-dim);border-left:3px solid var(--pink);padding:4px 10px}
 .note b{color:var(--pink)}
+.shot{margin:0;display:flex;flex-direction:column;gap:4px;animation:pop .5s both}
+.shot-btn{all:unset;cursor:zoom-in;display:block;border-radius:10px;overflow:hidden;border:2px solid var(--frame-light);background:#fff}
+.shot-btn:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.shot img{display:block;width:100%;max-height:210px;object-fit:contain;background:#fff}
+.shot figcaption{font-size:12px;color:var(--chalk-faint)}
+.shot figcaption a{color:var(--blue)}
+.work{border:1.5px dashed var(--blue);border-radius:10px;padding:8px 12px;font-size:13.5px;color:var(--chalk);background:rgba(159,211,230,.06)}
+.work-h{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--blue);margin-bottom:2px}
+.zoom{position:fixed;inset:0;z-index:20;background:rgba(10,18,15,.92);display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));cursor:zoom-out}
+.zoom[hidden]{display:none!important}
+.zoom img{max-width:100%;max-height:100%;border-radius:8px;background:#fff}
 
 /* quiz / interview */
 .quiz{display:flex;flex-direction:column;gap:14px}
@@ -187,12 +199,13 @@ footer a{color:var(--blue)}
   <header class="top">
     <div>
       <h1>Dynatrace <span>Chalkboard</span> Masterclass</h1>
-      <p>Twelve narrated lessons. Each one explains a piece of Dynatrace with a simple picture first, then the official engineering words, then how a consultant really uses it on a client mission.</p>
+      <p>Twelve short narrated lessons, 7 to 10 minutes each. Every scene gives a simple picture, the official terms, and a blue box that tells you what to look at on your own Dynatrace Managed tenant.</p>
     </div>
     <div class="legend" aria-label="Colour legend">
       <span class="y"><b>Yellow</b> = official term</span>
       <span class="bl"><b>Blue</b> = data moving</span>
       <span class="p"><b>Pink</b> = gotcha</span>
+      <span class="bl"><b>Dashed blue box</b> = check it at work</span>
     </div>
   </header>
 
@@ -213,6 +226,7 @@ footer a{color:var(--blue)}
       <button class="btn" id="mute" aria-pressed="true" title="Narration on/off (M)">🔊</button>
       <button class="btn" id="fs" title="Fullscreen (F)" aria-label="Fullscreen">⛶</button>
     </div>
+    <div class="zoom" id="zoom" hidden role="dialog" aria-label="Screenshot"><img id="zoomImg" alt=""></div>
     <div class="overlay" id="overlay">
       <button id="bigplay"><span class="big">▶</span><span id="ovTitle">Start lesson</span><small>The narration uses your browser's built-in voice. Turn your sound on. Space pauses, arrows skip scenes.</small></button>
     </div>
@@ -226,7 +240,7 @@ footer a{color:var(--blue)}
   <footer>
     Made for interview preparation. Everything here is checked against the public Dynatrace documentation at
     <a href="https://docs.dynatrace.com/docs" target="_blank" rel="noopener">docs.dynatrace.com</a>; product names and UI move quickly, so confirm details on your own tenant before quoting them in an interview.
-    A free Dynatrace trial tenant (15 days) is the best lab: <a href="https://www.dynatrace.com/signup/" target="_blank" rel="noopener">dynatrace.com/signup</a>.
+    Screenshots and diagrams are © Dynatrace, taken from the public documentation and linked to their source page; they are shown here for personal study only. Most screenshots show the latest SaaS platform, so some screens will look different on Managed. A free Dynatrace trial tenant (15 days) is the best lab for Grail, DQL and Workflows: <a href="https://www.dynatrace.com/signup/" target="_blank" rel="noopener">dynatrace.com/signup</a>.
   </footer>
 </div>
 
@@ -295,7 +309,12 @@ footer a{color:var(--blue)}
       body = `<div class="quiz">${s.quiz.map((q,qi)=>`<div class="q"><p>${qi+1}. ${rich(q.q)}</p><div class="opts">${q.o.map((o,oi)=>`<button class="opt" data-q="${qi}" data-o="${oi}">${rich(o)}</button>`).join('')}</div><div class="why" id="why${qi}" hidden><b>Why:</b> ${rich(q.why)}</div></div>`).join('')}</div>`;
     } else if(s.interview){
       body = `<div class="quiz">${s.interview.map(q=>`<details class="iv"><summary>${rich(q.q)}</summary><div>${rich(q.a)}</div></details>`).join('')}</div>`;
-    } else body = renderVisual(s.v);
+    } else {
+      body = '';
+      if(s.img) body += `<figure class="shot"><button type="button" class="shot-btn" data-zoom="images/${esc(s.img[0])}" aria-label="Enlarge screenshot"><img src="images/${esc(s.img[0])}" alt="${esc(s.img[1])}" loading="lazy"></button><figcaption>${esc(s.img[1])} <a href="${esc(s.img[2])}" target="_blank" rel="noopener">Source: Dynatrace docs</a></figcaption></figure>`;
+      body += renderVisual(s.v);
+      if(s.w) body += `<div class="work"><span class="work-h">Check it at work · Managed</span>${rich(s.w)}</div>`;
+    }
     const wide = s.quiz||s.interview;
     stage.innerHTML = `
       <div class="meta"><span class="ep">Lesson ${String(e.id).padStart(2,'0')}</span><span>${esc(e.title)}</span><span>Scene ${sc+1} of ${list.length}</span></div>
@@ -380,13 +399,17 @@ footer a{color:var(--blue)}
     const o=e.target.closest('.opt');
     if(o){ const q=EPS[ep].quiz[+o.dataset.q], right=+o.dataset.o===q.a;
       o.classList.add(right?'right':'wrong'); if(right) $('why'+o.dataset.q).hidden=false; }
+    const z=e.target.closest('[data-zoom]');
+    if(z){ $('zoomImg').src=z.dataset.zoom; $('zoomImg').alt=z.querySelector('img').alt; $('zoom').hidden=false; if(playing) pause(); return; }
     const c=e.target.closest('[data-copy]');
     if(c){ const t=c.closest('.code').querySelector('pre').innerText;
       const ok=()=>{c.textContent='Copied';setTimeout(()=>c.textContent='Copy',1400)};
       try{ navigator.clipboard.writeText(t).then(ok,()=>selectPre(c)); }catch(err){ selectPre(c); } }
   });
   function selectPre(c){ const r=document.createRange(); r.selectNodeContents(c.closest('.code').querySelector('pre')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); c.textContent='Press Ctrl+C'; }
+  $('zoom').onclick=()=>{ $('zoom').hidden=true; };
   document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && !$('zoom').hidden){ $('zoom').hidden=true; return; }
     if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
     if(e.key===' ' && !e.target.closest('button,summary')){ e.preventDefault(); playing?pause():play(); }
     else if(e.key==='ArrowRight') $('next').click();
