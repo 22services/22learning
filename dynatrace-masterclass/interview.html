@@ -1,0 +1,474 @@
+<title>Dynatrace Interview Masterclass</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="One 15-minute narrated video that prepares you to answer Dynatrace engineer and architect interview questions, ending with a spoken mock interview.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout concept: a classroom chalkboard used as a video screen. One player stage, chalk captions underneath,
+   a chapter list with timestamps below. Deliberately single-theme (dark board), so colors are explicit. */
+:root{
+  --board:#1d332c;        /* chalkboard green */
+  --board-deep:#152620;
+  --frame:#6b4a2f;        /* wooden frame */
+  --frame-light:#8a6443;
+  --chalk:#f1efe6;        /* chalk white */
+  --chalk-dim:#b9c4bb;
+  --chalk-faint:#7f978a;
+  --yellow:#f4d35e;       /* chalk yellow: official terms */
+  --pink:#f2a1a8;         /* chalk pink: warnings / gotchas */
+  --blue:#9fd3e6;         /* chalk blue: data flows */
+  --line:rgba(241,239,230,.16);
+  --page:#10201b;
+  --f-display:"Fredoka","Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--page);color:var(--chalk)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+header.top{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+header.top h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,4vw,38px);line-height:1.1;margin:0;text-wrap:balance}
+header.top h1 span{color:var(--yellow)}
+header.top p{margin:4px 0 0;color:var(--chalk-dim);max-width:62ch}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:var(--chalk-dim)}
+.legend b{font-weight:700}
+.legend .y{color:var(--yellow)} .legend .p{color:var(--pink)} .legend .bl{color:var(--blue)}
+
+/* ---------- player ---------- */
+.player{border:10px solid var(--frame);border-radius:14px;background:var(--board);
+  box-shadow:inset 0 0 0 2px var(--frame-light), 0 18px 40px rgba(0,0,0,.45);overflow:hidden;position:relative}
+.stage{position:relative;min-height:470px;padding:22px 26px 18px;display:flex;flex-direction:column;gap:14px;
+  background:radial-gradient(1200px 500px at 30% 0%,rgba(255,255,255,.05),transparent 60%),var(--board)}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.07;
+  background-image:repeating-linear-gradient(115deg,transparent 0 3px,rgba(255,255,255,.5) 3px 4px,transparent 4px 9px)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-faint)}
+.meta .ep{color:var(--yellow);font-weight:700}
+.scene-title{font-family:var(--f-display);font-weight:600;font-size:clamp(22px,3vw,32px);line-height:1.15;margin:0;text-wrap:balance}
+.scene-body{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:22px;align-items:start;flex:1}
+.kid{display:flex;flex-direction:column;gap:10px;min-width:0}
+.kid .emoji{font-size:64px;line-height:1;filter:drop-shadow(0 4px 0 rgba(0,0,0,.25))}
+.kid .story{font-family:var(--f-display);font-weight:500;font-size:19px;line-height:1.4;color:var(--chalk)}
+.kid .story b{color:var(--yellow);font-weight:600}
+.kid .label{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--pink);font-weight:700}
+.visual{min-width:0;display:flex;flex-direction:column;gap:10px}
+
+/* flow */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}
+.node{flex:1 1 110px;min-width:0;border:2px dashed rgba(241,239,230,.45);border-radius:12px;padding:10px 10px 8px;text-align:center;
+  animation:pop .5s both}
+.node .i{font-size:26px;display:block}
+.node .l{font-family:var(--f-display);font-weight:600;font-size:15px;display:block;color:var(--chalk);overflow-wrap:anywhere}
+.node .s{font-size:12px;color:var(--chalk-dim);display:block;overflow-wrap:anywhere}
+.arrow{flex:0 0 28px;align-self:center;position:relative;height:4px;background:rgba(159,211,230,.35);border-radius:2px;animation:pop .5s both}
+.arrow::after{content:"";position:absolute;top:-4px;left:0;width:12px;height:12px;border-radius:50%;background:var(--blue);
+  box-shadow:0 0 10px var(--blue);animation:packet 1.4s linear infinite}
+/* stack */
+.stack{display:flex;flex-direction:column;gap:6px}
+.layer{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:center;border-left:4px solid var(--blue);
+  background:rgba(255,255,255,.04);padding:8px 12px;border-radius:0 10px 10px 0;animation:slide .45s both}
+.layer .i{font-size:22px;text-align:center}
+.layer b{font-family:var(--f-display);font-weight:600;color:var(--chalk)}
+.layer span{display:block;font-size:13px;color:var(--chalk-dim)}
+.layer.hot{border-left-color:var(--yellow);background:rgba(244,211,94,.08)}
+.layer.warn{border-left-color:var(--pink);background:rgba(242,161,168,.08)}
+/* compare */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.col{border:2px solid var(--line);border-radius:12px;padding:10px 12px;animation:pop .5s both;min-width:0}
+.col h4{margin:0 0 6px;font-family:var(--f-display);font-weight:600;font-size:16px;color:var(--yellow)}
+.col ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--chalk-dim)}
+.col li{margin:2px 0}
+/* chips / glossary */
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.chip{border:1.5px solid rgba(244,211,94,.5);border-radius:10px;padding:8px 10px;animation:pop .45s both;min-width:0}
+.chip b{display:block;color:var(--yellow);font-family:var(--f-mono);font-size:13px;font-weight:600;overflow-wrap:anywhere}
+.chip span{font-size:13px;color:var(--chalk-dim)}
+/* code */
+.code{background:var(--board-deep);border:1px solid var(--line);border-radius:10px;overflow-x:auto;max-height:300px;overflow-y:auto}
+.code .cap{display:flex;justify-content:space-between;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--chalk-faint)}
+.code .cap button{all:unset;cursor:pointer;color:var(--blue);font-weight:700}
+.code .cap button:focus-visible{outline:2px solid var(--yellow)}
+.code pre{margin:0;padding:10px 12px;font-family:var(--f-mono);font-size:12.5px;line-height:1.55;color:var(--chalk)}
+.code pre .ln{display:block;white-space:pre;animation:type .35s both}
+.code .c{color:var(--chalk-faint)} .code .k{color:var(--yellow)} .code .s{color:var(--blue)}
+.note{font-size:13px;color:var(--chalk-dim);border-left:3px solid var(--pink);padding:4px 10px}
+.note b{color:var(--pink)}
+.shot{margin:0;display:flex;flex-direction:column;gap:4px;animation:pop .5s both}
+.shot-btn{all:unset;cursor:zoom-in;display:block;border-radius:10px;overflow:hidden;border:2px solid var(--frame-light);background:#fff}
+.shot-btn:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.shot img{display:block;width:100%;max-height:210px;object-fit:contain;background:#fff}
+.shot figcaption{font-size:12px;color:var(--chalk-faint)}
+.shot figcaption a{color:var(--blue)}
+.work{border:1.5px dashed var(--blue);border-radius:10px;padding:8px 12px;font-size:13.5px;color:var(--chalk);background:rgba(159,211,230,.06)}
+.work-h{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--blue);margin-bottom:2px}
+.zoom{position:fixed;inset:0;z-index:20;background:rgba(10,18,15,.92);display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));cursor:zoom-out}
+.zoom[hidden]{display:none!important}
+.zoom img{max-width:100%;max-height:100%;border-radius:8px;background:#fff}
+
+/* quiz / interview */
+.quiz{display:flex;flex-direction:column;gap:14px}
+.q{border:2px solid var(--line);border-radius:12px;padding:12px 14px}
+.q p{margin:0 0 8px;font-weight:700}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{all:unset;cursor:pointer;border:1.5px solid rgba(241,239,230,.3);border-radius:9px;padding:7px 10px;font-size:14px;color:var(--chalk)}
+.opt:hover{border-color:var(--chalk)}
+.opt:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.opt.right{border-color:var(--yellow);background:rgba(244,211,94,.12)}
+.opt.wrong{border-color:var(--pink);background:rgba(242,161,168,.1);text-decoration:line-through}
+.why{font-size:13.5px;color:var(--chalk-dim);margin-top:8px}
+.why b{color:var(--yellow)}
+details.iv{border:2px solid var(--line);border-radius:12px;padding:10px 14px}
+details.iv summary{cursor:pointer;font-weight:700}
+details.iv summary::marker{color:var(--yellow)}
+details.iv div{margin-top:8px;font-size:14px;color:var(--chalk-dim)}
+details.iv div b{color:var(--yellow)}
+
+/* captions + controls */
+.captions{min-height:64px;padding:10px 26px;background:rgba(0,0,0,.28);border-top:1px solid var(--line);
+  font-size:17px;line-height:1.45;color:var(--chalk);display:flex;align-items:center}
+.captions b{color:var(--yellow)}
+.captions:has(#captions[hidden]){display:none}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 14px;background:var(--board-deep);border-top:1px solid var(--line)}
+.btn{all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:38px;height:38px;padding:0 10px;
+  border-radius:9px;border:1.5px solid rgba(241,239,230,.25);color:var(--chalk);font-size:14px;font-weight:700}
+.btn:hover{border-color:var(--chalk)}
+.btn:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.btn.primary{background:var(--yellow);color:var(--board-deep);border-color:var(--yellow);min-width:84px}
+.btn[aria-pressed="false"]{opacity:.55}
+.segs{flex:1 1 200px;display:flex;gap:3px;min-width:0}
+.seg{all:unset;cursor:pointer;flex:1;height:8px;border-radius:4px;background:rgba(241,239,230,.18);position:relative;overflow:hidden}
+.seg:focus-visible{outline:2px solid var(--yellow)}
+.seg.done{background:var(--chalk-dim)}
+.seg.cur::after{content:"";position:absolute;inset:0;width:var(--p,0%);background:var(--yellow)}
+.seg.cur{background:rgba(244,211,94,.25)}
+select.sel{background:var(--board-deep);color:var(--chalk);border:1.5px solid rgba(241,239,230,.25);border-radius:9px;height:38px;padding:0 8px;font:inherit;font-size:13px;max-width:200px}
+.time{font-variant-numeric:tabular-nums;font-size:13px;color:var(--chalk-faint)}
+
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(16,32,27,.55);z-index:3}
+.overlay[hidden]{display:none!important}
+.overlay button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:var(--f-display);font-size:20px;font-weight:600;color:var(--chalk)}
+.overlay .big{width:92px;height:92px;border-radius:50%;background:var(--yellow);color:var(--board-deep);display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 8px 0 rgba(0,0,0,.25)}
+.overlay button:focus-visible .big{outline:4px solid var(--chalk);outline-offset:4px}
+.overlay small{font-family:var(--f-body);font-size:13px;color:var(--chalk-dim);font-weight:400;max-width:34ch;text-align:center}
+
+/* drill */
+.drill{display:flex;flex-direction:column;gap:10px}
+.drill-q{position:relative;font-family:var(--f-display);font-weight:600;font-size:21px;line-height:1.3;border:2px solid var(--yellow);border-radius:14px;padding:14px 16px;padding-right:70px}
+.drill-l{display:block;font-family:var(--f-body);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--pink);font-weight:700;margin-bottom:4px}
+.drill-count{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:var(--f-display);font-size:30px;color:var(--yellow);font-variant-numeric:tabular-nums}
+.drill.thinking .drill-q{box-shadow:0 0 0 4px rgba(244,211,94,.18)}
+.drill-a{border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;animation:pop .4s both}
+.drill-a[hidden]{display:none!important}
+.drill-a ul{margin:0;padding-left:20px;color:var(--chalk);font-size:14.5px}
+.drill-a li{margin:3px 0}
+.drill-show{align-self:flex-start}
+.drill-show[hidden]{display:none!important}
+/* chapters */
+.chapters{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 16px}
+.ch-part{grid-column:1/-1;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--pink);font-weight:700;margin-top:10px}
+.ch{all:unset;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;width:100%;box-sizing:border-box;padding:7px 10px;border-radius:9px;color:var(--chalk-dim)}
+.ch:hover{background:rgba(255,255,255,.05);color:var(--chalk)}
+.ch:focus-visible{outline:2px solid var(--yellow)}
+.ch.on{background:rgba(244,211,94,.12);color:var(--chalk)}
+.ch.past .ch-n{color:var(--chalk-faint)}
+.ch-t{font-variant-numeric:tabular-nums;color:var(--blue);font-size:13px}
+.ch-n{font-size:14px}
+.ch-n b{color:inherit;font-weight:400}
+/* syllabus */
+.syl-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px}
+.syl-head h2{font-family:var(--f-display);font-weight:600;font-size:22px;margin:0}
+.syl-head span{font-size:13px;color:var(--chalk-dim)}
+.phase{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--pink);font-weight:700;margin:10px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.card{all:unset;cursor:pointer;display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:12px;border-radius:12px;
+  background:#f1efe6;color:#1d2b25;border:2px solid transparent;transform:rotate(var(--r,0deg));transition:transform .15s}
+.card:hover{transform:rotate(0) translateY(-2px)}
+.card:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.card.active{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(244,211,94,.35)}
+.card .n{font-family:var(--f-display);font-weight:700;font-size:26px;color:#6b4a2f;font-variant-numeric:tabular-nums;line-height:1}
+.card h3{margin:0;font-family:var(--f-display);font-weight:600;font-size:16px;line-height:1.25}
+.card p{margin:3px 0 0;font-size:12.5px;color:#4a5a52}
+.card .done{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#2f7a52}
+footer{font-size:13px;color:var(--chalk-faint);border-top:1px solid var(--line);padding-top:14px}
+footer a{color:var(--blue)}
+
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes slide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes type{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes packet{from{left:0}to{left:calc(100% - 12px)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+@media (max-width:760px){
+  .stage{min-height:0;padding:16px 14px 14px}
+  .scene-body{grid-template-columns:minmax(0,1fr)}
+  .kid{flex-direction:row;align-items:flex-start}
+  .kid .emoji{font-size:44px}
+  .kid .story{font-size:17px}
+  .compare{grid-template-columns:1fr}
+  .flow{flex-direction:column}
+  .arrow{flex:0 0 22px;width:4px;height:22px;align-self:center}
+  .arrow::after{left:-4px;animation-name:packetv}
+  .captions{padding:10px 14px;font-size:15.5px}
+  .player{border-width:6px}
+}
+@keyframes packetv{from{top:0}to{top:calc(100% - 12px)}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Dynatrace <span>Interview</span> Masterclass</h1>
+      <p>One continuous video of about 15 minutes. Part 1 gives you a method for answering. Part 2 gives you the answer to each classic question in interview form. Part 3 is a spoken mock interview: you hear a question, answer out loud during the countdown, then hear the model answer.</p>
+    </div>
+    <div class="legend" aria-label="Colour legend">
+      <span class="y"><b>Yellow</b> = official term</span>
+      <span class="bl"><b>Blue</b> = data moving</span>
+      <span class="p"><b>Pink</b> = gotcha</span>
+      <span class="bl"><b>Countdown</b> = your turn to speak</span>
+    </div>
+  </header>
+
+  <section class="player" aria-label="Lesson player">
+    <div class="stage" id="stage" aria-live="polite"></div>
+    <div class="captions"><span id="captions"></span></div>
+    <div class="controls">
+      <button class="btn" id="prev" aria-label="Previous scene" title="Previous scene (←)">⏮</button>
+      <button class="btn primary" id="play" aria-label="Play">▶ Play</button>
+      <button class="btn" id="next" aria-label="Next scene" title="Next scene (→)">⏭</button>
+      <div class="segs" id="segs" role="group" aria-label="Scenes"></div>
+      <span class="time" id="time">1/1</span>
+      <select class="sel" id="speed" aria-label="Narration speed">
+        <option value="0.85">0.85×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option><option value="1.5">1.5×</option>
+      </select>
+      <select class="sel" id="voice" aria-label="Narrator voice"><option value="">Default voice</option></select>
+      <button class="btn" id="cc" aria-pressed="true" title="Captions (C)">CC</button>
+      <button class="btn" id="mute" aria-pressed="true" title="Narration on/off (M)">🔊</button>
+      <button class="btn" id="fs" title="Fullscreen (F)" aria-label="Fullscreen">⛶</button>
+    </div>
+    <div class="zoom" id="zoom" hidden role="dialog" aria-label="Screenshot"><img id="zoomImg" alt=""></div>
+    <div class="overlay" id="overlay">
+      <button id="bigplay"><span class="big">▶</span><span id="ovTitle">Start lesson</span><small>The narration uses your browser's built-in voice. Turn your sound on. Space pauses, arrows skip scenes.</small></button>
+    </div>
+  </section>
+
+  <section aria-label="Syllabus">
+    <div class="syl-head"><h2>Chapters</h2><span id="progress"></span></div>
+    <div id="syllabus"></div>
+  </section>
+
+  <footer>
+    Made for interview preparation. Companion to the 12-lesson Chalkboard Masterclass. Everything here is checked against the public Dynatrace documentation at
+    <a href="https://docs.dynatrace.com/docs" target="_blank" rel="noopener">docs.dynatrace.com</a>; product names and UI move quickly, so confirm details on your own tenant before quoting them in an interview.
+    Screenshots and diagrams are © Dynatrace, taken from the public documentation and linked to their source page; they are shown here for personal study only. Most screenshots show the latest SaaS platform, so some screens will look different on Managed. A free Dynatrace trial tenant (15 days) is the best lab for Grail, DQL and Workflows: <a href="https://www.dynatrace.com/signup/" target="_blank" rel="noopener">dynatrace.com/signup</a>.
+  </footer>
+</div>
+
+<script src="interview-video.js"></script>
+<script>
+(function(){
+  const EPS = (window.EPISODES||[]).slice().sort((a,b)=>a.id-b.id);
+  const $ = id => document.getElementById(id);
+  const stage=$('stage'), caps=$('captions'), segs=$('segs'), playBtn=$('play'), overlay=$('overlay');
+  const synth = window.speechSynthesis || null;
+  const store = { get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+                  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}} };
+
+  let ep=0, sc=0, sent=0, playing=false, timer=null, token=0;
+  let speed=1, narrate=true, voices=[], voiceName=store.get('dt.voice','');
+  const done = new Set(store.get('dt.done',[]));
+
+  const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const rich = s => esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  const plain = s => String(s).replace(/\*\*/g,'');
+  const splitS = s => (String(s).match(/[^.!?]+[.!?]+["')]?|[^.!?]+$/g)||[s]).map(x=>x.trim()).filter(Boolean);
+  const sentences = s => String(s).split(/(\[\[think:\d+\]\])/).flatMap(p=>/^\[\[think:\d+\]\]$/.test(p)?[p]:splitS(p));
+  const WPM = 160;
+  const secsOf = s => sentences(s.n).reduce((a,p)=>{ const m=/^\[\[think:(\d+)\]\]$/.exec(p); return a+(m? +m[1] : p.split(/\s+/).length/WPM*60/speed); },0)+1.2;
+  const fmt = t => `${Math.floor(t/60)}:${String(Math.round(t%60)).padStart(2,'0')}`;
+
+  /* scenes = narrated scenes + quiz + interview */
+  function scenesOf(e){
+    const list = e.scenes.slice();
+    list.push({t:'Written knowledge check', e:'📝', k:'Five quick questions. Tap an answer; a wrong one shows you the reason.', n:'The video is over. Here is a short written knowledge check. Answer the five questions at your own pace.', quiz:e.quiz});
+    list.push({t:'Extra interview questions', e:'🎤', k:'Six more questions experienced Dynatrace engineers ask. Answer aloud first, then open the model answer.', n:'Finally, six extra interview questions. Answer each one aloud before you open the model answer.', interview:e.interview});
+    return list;
+  }
+
+  function renderVisual(v){
+    if(!v) return '';
+    const d = i => `style="animation-delay:${(0.15+i*0.18).toFixed(2)}s"`;
+    if(v.type==='flow'){
+      let h='<div class="flow">';
+      v.nodes.forEach((n,i)=>{ if(i) h+=`<div class="arrow" ${d(i*2-1)} aria-hidden="true"></div>`;
+        h+=`<div class="node" ${d(i*2)}><span class="i" aria-hidden="true">${n[0]}</span><span class="l">${esc(n[1])}</span>${n[2]?`<span class="s">${esc(n[2])}</span>`:''}</div>`;});
+      return h+'</div>'+(v.note?`<div class="note">${rich(v.note)}</div>`:'');
+    }
+    if(v.type==='stack'){
+      return '<div class="stack">'+v.layers.map((l,i)=>`<div class="layer ${l[3]||''}" ${d(i)}><span class="i" aria-hidden="true">${l[0]}</span><div><b>${esc(l[1])}</b>${l[2]?`<span>${rich(l[2])}</span>`:''}</div></div>`).join('')+'</div>'+(v.note?`<div class="note">${rich(v.note)}</div>`:'');
+    }
+    if(v.type==='compare'){
+      return '<div class="compare">'+v.cols.map((c,i)=>`<div class="col" ${d(i)}><h4>${esc(c[0])}</h4><ul>${c[1].map(x=>`<li>${rich(x)}</li>`).join('')}</ul></div>`).join('')+'</div>'+(v.note?`<div class="note">${rich(v.note)}</div>`:'');
+    }
+    if(v.type==='chips'){
+      return '<div class="chips">'+v.items.map((c,i)=>`<div class="chip" ${d(i)}><b>${esc(c[0])}</b><span>${rich(c[1])}</span></div>`).join('')+'</div>'+(v.note?`<div class="note">${rich(v.note)}</div>`:'');
+    }
+    if(v.type==='drill'){
+      return `<div class="drill"><div class="drill-q"><span class="drill-l">Interviewer asks</span>${rich(v.q)}<span class="drill-count" aria-live="off"></span></div><div class="drill-a" hidden><span class="drill-l">Model answer checklist</span><ul>${v.pts.map(p=>`<li>${rich(p)}</li>`).join('')}</ul></div><button type="button" class="btn drill-show">Show model answer</button></div>`;
+    }
+    if(v.type==='code'){
+      const lines = v.code.replace(/\n$/,'').split('\n');
+      const hl = l => { const e=esc(l);
+        if(/^\s*(#|\/\/)/.test(l)) return `<span class="c">${e}</span>`;
+        return e.replace(/(&quot;[^&]*?&quot;)/g,'<span class="s">$1</span>')
+                .replace(/^(\s*)(fetch|timeseries|filter|summarize|fields|fieldsAdd|parse|sort|limit|lookup|join|makeTimeseries|data|smartscapeNodes|by|apiVersion|kind|spec|resource|provider|configs|manifestVersion|projects|environmentGroups|exporters|receivers|processors|service|pipelines)\b/,'$1<span class="k">$2</span>')
+                .replace(/^(\s*\|\s*)(\w+)/,'$1<span class="k">$2</span>'); };
+      return `<div class="code"><div class="cap"><span>${esc(v.lang||'code')}</span><button type="button" data-copy>Copy</button></div><pre>${lines.map((l,i)=>`<span class="ln" style="animation-delay:${(0.1+i*0.07).toFixed(2)}s">${hl(l)||' '}</span>`).join('')}</pre></div>`+(v.note?`<div class="note">${rich(v.note)}</div>`:'');
+    }
+    return '';
+  }
+
+  function renderScene(){
+    const e=EPS[ep], list=scenesOf(e), s=list[sc];
+    let body;
+    if(s.quiz){
+      body = `<div class="quiz">${s.quiz.map((q,qi)=>`<div class="q"><p>${qi+1}. ${rich(q.q)}</p><div class="opts">${q.o.map((o,oi)=>`<button class="opt" data-q="${qi}" data-o="${oi}">${rich(o)}</button>`).join('')}</div><div class="why" id="why${qi}" hidden><b>Why:</b> ${rich(q.why)}</div></div>`).join('')}</div>`;
+    } else if(s.interview){
+      body = `<div class="quiz">${s.interview.map(q=>`<details class="iv"><summary>${rich(q.q)}</summary><div>${rich(q.a)}</div></details>`).join('')}</div>`;
+    } else {
+      body = '';
+      if(s.img) body += `<figure class="shot"><button type="button" class="shot-btn" data-zoom="images/${esc(s.img[0])}" aria-label="Enlarge screenshot"><img src="images/${esc(s.img[0])}" alt="${esc(s.img[1])}" loading="lazy"></button><figcaption>${esc(s.img[1])} <a href="${esc(s.img[2])}" target="_blank" rel="noopener">Source: Dynatrace docs</a></figcaption></figure>`;
+      body += renderVisual(s.v);
+      if(s.w) body += `<div class="work"><span class="work-h">Check it at work · Managed</span>${rich(s.w)}</div>`;
+    }
+    const wide = s.quiz||s.interview;
+    stage.innerHTML = `
+      <div class="meta"><span class="ep">Interview video</span><span>Chapter ${sc+1} of ${list.length}</span></div>
+      <h2 class="scene-title">${rich(s.t)}</h2>
+      <div class="scene-body" style="${wide?'grid-template-columns:minmax(0,3fr) minmax(0,9fr)':''}">
+        <div class="kid"><span class="emoji" aria-hidden="true">${s.e||'💡'}</span><div><div class="label">${wide?'How this works':(s.v&&s.v.type==='drill'?'Topic':'Your one-line answer')}</div><div class="story">${rich(s.k)}</div></div></div>
+        <div class="visual">${body}</div>
+      </div>`;
+    segs.innerHTML = list.map((x,i)=>`<button class="seg ${i<sc?'done':''} ${i===sc?'cur':''}" data-i="${i}" aria-label="Scene ${i+1}: ${esc(plain(x.t))}" title="${esc(plain(x.t))}"></button>`).join('');
+    { const tl=list.map(secsOf), before=tl.slice(0,sc).reduce((a,b)=>a+b,0), total=tl.reduce((a,b)=>a+b,0); $('time').textContent = `${fmt(before)} / ${fmt(total)}`; }
+    caps.innerHTML = rich(sentences(s.n)[0]||'');
+    renderSyllabus();
+    if(sc===list.length-1){ done.add(e.id); store.set('dt.done',[...done]); renderSyllabus(); }
+  }
+
+  function revealDrill(){ const d=stage.querySelector('.drill'); if(!d) return; d.classList.remove('thinking'); d.querySelector('.drill-a').hidden=false; d.querySelector('.drill-show').hidden=true; const c=d.querySelector('.drill-count'); if(c) c.textContent=''; }
+  function setProgress(p){ const c=segs.querySelector('.seg.cur'); if(c) c.style.setProperty('--p',(p*100).toFixed(1)+'%'); }
+
+  function stopAudio(){ token++; clearTimeout(timer); if(synth) synth.cancel(); }
+
+  function speakFrom(i){
+    stopAudio(); const my=token;
+    const s=scenesOf(EPS[ep])[sc], parts=sentences(s.n);
+    if(i>=parts.length){ setProgress(1);
+      if(s.quiz||s.interview){ setPlaying(false); return; }
+      timer=setTimeout(()=>{ if(my===token&&playing) go(sc+1,true); },1100/speed); return; }
+    sent=i; setProgress(i/parts.length);
+    const nextOne=()=>{ if(my===token&&playing) speakFrom(i+1); };
+    const th=/^\[\[think:(\d+)\]\]$/.exec(parts[i]);
+    if(th){ let left=+th[1];
+      const tick=()=>{ if(my!==token||!playing) return;
+        if(left<=0){ revealDrill(); nextOne(); return; }
+        caps.innerHTML=`🎤 <b>Your turn.</b> Answer out loud now · <b>${left}s</b>`; const c=stage.querySelector('.drill-count'); if(c) c.textContent=left+'s'; left--; timer=setTimeout(tick,1000); };
+      stage.querySelector('.drill')?.classList.add('thinking'); tick(); return; }
+    caps.innerHTML=rich(parts[i]);
+    if(narrate && synth){
+      const u=new SpeechSynthesisUtterance(plain(parts[i]));
+      u.rate=speed; u.pitch=1.02; const v=voices.find(v=>v.name===voiceName); if(v){u.voice=v;u.lang=v.lang}else u.lang='en-GB';
+      let fired=false; const fin=()=>{ if(fired) return; fired=true; clearTimeout(guard); nextOne(); };
+      u.onend=fin; u.onerror=fin;
+      const words=plain(parts[i]).split(/\s+/).length;
+      const guard=setTimeout(fin,(words*0.55+4)*1000/speed); /* safety net if a browser never fires onend */
+      synth.speak(u);
+    } else {
+      const words=plain(parts[i]).split(/\s+/).length;
+      timer=setTimeout(nextOne,Math.max(1800,words*330)/speed);
+    }
+  }
+
+  function setPlaying(p){ playing=p; playBtn.textContent=p?'⏸ Pause':'▶ Play'; playBtn.setAttribute('aria-label',p?'Pause':'Play'); if(!p) stopAudio(); }
+  function play(){ overlay.hidden=true; setPlaying(true); speakFrom(sent); }
+  function pause(){ setPlaying(false); }
+
+  function go(i,auto){
+    const list=scenesOf(EPS[ep]);
+    if(i<0) i=0;
+    if(i>=list.length){ setPlaying(false); return; }
+    stopAudio(); sc=i; sent=0; renderScene(); writeHash();
+    if(playing) speakFrom(0); else if(!auto) setProgress(0);
+  }
+  function loadEp(n,start){
+    stopAudio(); ep=Math.max(0,Math.min(EPS.length-1,n)); sc=0; sent=0; renderScene(); writeHash();
+    $('ovTitle').textContent = `Play the interview masterclass · about ${EPS[ep].minutes} min`;
+    if(start) play(); else { setPlaying(false); overlay.hidden=false; }
+  }
+  function writeHash(){ const h='#chapter-'+(sc+1); if(location.hash!==h) try{history.replaceState(null,'',h)}catch(e){location.hash=h} }
+
+  function renderSyllabus(){
+    const list=scenesOf(EPS[ep]); let t=0, h='<ol class="chapters">';
+    const part=i=> i===0?'Method': list[i].v&&list[i].v.type==='drill'?'Mock interview': (list[i].quiz||list[i].interview)?'Practice': i>=15&&i<=24?'Mock interview':'Answers';
+    let last='';
+    list.forEach((x,i)=>{ const p=part(i); if(p!==last){ h+=`<li class="ch-part">${p}</li>`; last=p; }
+      h+=`<li><button type="button" class="ch ${i===sc?'on':''} ${i<sc?'past':''}" data-i="${i}"><span class="ch-t">${fmt(t)}</span><span class="ch-n">${rich(x.t)}</span></button></li>`; t+=secsOf(x); });
+    $('syllabus').innerHTML=h+'</ol>'; $('progress').textContent=`about ${Math.round(t/60)} minutes at ${speed}× speed`;
+  }
+
+  /* events */
+  playBtn.onclick=()=>playing?pause():play();
+  $('bigplay').onclick=play;
+  $('prev').onclick=()=>go(sc-1);
+  $('next').onclick=()=>{ const n=scenesOf(EPS[ep]).length; if(sc+1>=n && ep+1<EPS.length) loadEp(ep+1,playing); else go(sc+1); };
+  segs.onclick=e=>{ const b=e.target.closest('.seg'); if(b){ overlay.hidden=true; go(+b.dataset.i);} };
+  $('syllabus').onclick=e=>{ const c=e.target.closest('.ch'); if(c){ overlay.hidden=true; go(+c.dataset.i); document.querySelector('.player').scrollIntoView({behavior:'smooth',block:'start'}); } };
+  $('speed').onchange=e=>{ speed=+e.target.value; renderSyllabus(); renderScene(); if(playing) speakFrom(sent); };
+  $('voice').onchange=e=>{ voiceName=e.target.value; store.set('dt.voice',voiceName); if(playing) speakFrom(sent); };
+  $('cc').onclick=()=>{ caps.hidden=!caps.hidden; $('cc').setAttribute('aria-pressed',String(!caps.hidden)); };
+  $('mute').onclick=()=>{ narrate=!narrate; $('mute').textContent=narrate?'🔊':'🔇'; $('mute').setAttribute('aria-pressed',String(narrate)); if(playing) speakFrom(sent); };
+  $('fs').onclick=()=>{ const p=document.querySelector('.player'); try{ document.fullscreenElement?document.exitFullscreen():p.requestFullscreen&&p.requestFullscreen().catch(()=>{}); }catch(e){} };
+  stage.addEventListener('click',e=>{
+    const o=e.target.closest('.opt');
+    if(o){ const q=EPS[ep].quiz[+o.dataset.q], right=+o.dataset.o===q.a;
+      o.classList.add(right?'right':'wrong'); if(right) $('why'+o.dataset.q).hidden=false; }
+    if(e.target.closest('.drill-show')){ revealDrill(); return; }
+    const z=e.target.closest('[data-zoom]');
+    if(z){ $('zoomImg').src=z.dataset.zoom; $('zoomImg').alt=z.querySelector('img').alt; $('zoom').hidden=false; if(playing) pause(); return; }
+    const c=e.target.closest('[data-copy]');
+    if(c){ const t=c.closest('.code').querySelector('pre').innerText;
+      const ok=()=>{c.textContent='Copied';setTimeout(()=>c.textContent='Copy',1400)};
+      try{ navigator.clipboard.writeText(t).then(ok,()=>selectPre(c)); }catch(err){ selectPre(c); } }
+  });
+  function selectPre(c){ const r=document.createRange(); r.selectNodeContents(c.closest('.code').querySelector('pre')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); c.textContent='Press Ctrl+C'; }
+  $('zoom').onclick=()=>{ $('zoom').hidden=true; };
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && !$('zoom').hidden){ $('zoom').hidden=true; return; }
+    if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key===' ' && !e.target.closest('button,summary')){ e.preventDefault(); playing?pause():play(); }
+    else if(e.key==='ArrowRight') $('next').click();
+    else if(e.key==='ArrowLeft') $('prev').click();
+    else if(e.key==='c'||e.key==='C') $('cc').click();
+    else if(e.key==='m'||e.key==='M') $('mute').click();
+    else if(e.key==='f'||e.key==='F') $('fs').click();
+  });
+
+  function loadVoices(){
+    if(!synth) return; voices=synth.getVoices().filter(v=>/^en/i.test(v.lang));
+    const rank=v=>(/natural|neural|online/i.test(v.name)?0:/google/i.test(v.name)?1:/samantha|daniel|serena|karen|moira/i.test(v.name)?2:3)+(/en-GB/i.test(v.lang)?0:0.5);
+    voices.sort((a,b)=>rank(a)-rank(b));
+    if(!voiceName && voices[0]) voiceName=voices[0].name;
+    $('voice').innerHTML = voices.length? voices.map(v=>`<option value="${esc(v.name)}" ${v.name===voiceName?'selected':''}>${esc(v.name.replace(/Microsoft |Google /,''))} · ${esc(v.lang)}</option>`).join('') : '<option value="">Default voice</option>';
+  }
+  if(synth){ loadVoices(); synth.onvoiceschanged=loadVoices; } else { narrate=false; $('mute').textContent='🔇'; $('mute').setAttribute('aria-pressed','false'); $('voice').disabled=true; }
+
+  function fromHash(){ return 0; }
+  
+  loadEp(0,false); { const m=/chapter-(\d+)/.exec(location.hash); if(m) go(+m[1]-1); }
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden && playing) pause(); });
+})();
+</script>

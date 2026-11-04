@@ -11,3 +11,6 @@ Web Speech voice; captions, speed, voice choice, scene skipping, quizzes and int
 Keys: Space play/pause · ←/→ scenes · C captions · M narration · F fullscreen.
 
 Each scene has a "Check it at work · Managed" tip. Screenshots in `images/` are © Dynatrace, from docs.dynatrace.com (source linked on each), for personal study.
+
+## Interview video
+`interview.html` + `interview-video.js`: one ~15-minute video. Part 1 answer method, Part 2 answer-shaped knowledge, Part 3 spoken mock interview (8 questions, 10 s countdown, model answer), then a written check and 6 extra questions.
